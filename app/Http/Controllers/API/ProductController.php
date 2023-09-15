@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Product\StroeProductRequest;
+use App\Http\Requests\Product\UpdateProductRequest;
 use App\Http\Traits\ApiTrait;
 use App\Models\Product;
 use Illuminate\Support\Facades\Validator;
@@ -27,15 +29,8 @@ class ProductController extends Controller
         return $this->apiResponse(200, 'Product found', 'null', $product);
     }
 
-    public function store(Request $request)
+    public function store(StroeProductRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'unique:products,name'],
-            'price' => ['required', 'numeric'],
-        ]);
-        if ($validator->fails()) {
-            return $this->apiResponse(400, 'Validation error', $validator->errors(), 'null');
-        }
         $product = Product::create([
             'name' => $request->name,
             'price' => $request->price,
@@ -43,18 +38,11 @@ class ProductController extends Controller
         return $this->apiResponse(201, 'Product created', 'null', $product);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateProductRequest $request, $id)
     {
         $product = Product::find($id);
         if (!$product) {
             return $this->apiResponse(404, 'Product not found', 'Product not found', 'null');
-        }
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'unique:products,name,' . $id],
-            'price' => ['required', 'numeric'],
-        ]);
-        if ($validator->fails()) {
-            return $this->apiResponse(400, 'Validation error', $validator->errors(), 'null');
         }
         $product->update([
             'name' => $request->name,
